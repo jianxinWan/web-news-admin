@@ -1,25 +1,52 @@
 import React, { useState } from 'react';
-
-import { Input, Select, Button } from 'antd'
+import axios from 'axios';
+import { Input, Select, Button, notification } from 'antd'
 import Editor from '../../components/editor'
-
+import 'antd/lib/notification/style'
 import 'antd/lib/input/style'
 import 'antd/lib/select/style'
 
 const { Option } = Select;
 
+function getDate() {
+  const myDate = new Date();
+  myDate.getYear();        //获取当前年份(2位)  
+  myDate.getFullYear();    //获取完整的年份(4位,1970-????)  
+  myDate.getMonth();       //获取当前月份(0-11,0代表`1月)  
+  myDate.getDate();        //获取当前日(1-31)  
+  myDate.getDay();         //获取当前星期X(0-6,0代表星期天)  
+  myDate.getTime();        //获取当前时间(从1970.1.1开始的毫秒数)  
+  myDate.getHours();       //获取当前小时数(0-23)  
+  myDate.getMinutes();     //获取当前分钟数(0-59)  
+  myDate.getSeconds();     //获取当前秒数(0-59)  
+  myDate.getMilliseconds();    //获取当前毫秒数(0-999)  
+  myDate.toLocaleDateString();     //获取当前日期 
+  return myDate.toLocaleTimeString(); //获取日期与时间  
+}
+
 function submitInfo(title, htmlContent, type, source) {
   console.log(title, htmlContent, type, source)
-  window
-    .fetch('', {
-      credentials: "include"
+  axios.post('http://118.89.221.170:9004/api/news/news-add/', {
+    datetime: getDate(),
+    introduction: 'html',
+    resource: source,
+    title: title,
+    type: type
+  })
+    .then(function (response) {
+      notification.success({
+        message: '添加成功',
+        description:
+          '新闻发布成功，去首页查看你添加的内容吧',
+      });
     })
-    .then(res => res.json())
-    .then(({
-      message,
-      data
-    }) => {
-    })
+    .catch(function (error) {
+      notification.fail({
+        message: '添加失败',
+        description:
+          '添加失败，请稍后再试！',
+      });
+    });
 }
 
 const optionList = {

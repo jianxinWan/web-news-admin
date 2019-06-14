@@ -1,66 +1,45 @@
 import React, { useState } from 'react';
-import { Table, Divider, Tag } from 'antd';
+import { Table, Divider, notification } from 'antd';
+import axios from 'axios'
 import Search from '../../components/searchNews';
 import 'antd/lib/table/style'
 import 'antd/lib/divider/style'
 import 'antd/lib/tag/style'
+import 'antd/lib/notification/style'
 
 const { Column } = Table;
 
-const data = [
-  {
-    key: '1',
-    firstName: 'John',
-    lastName: 'Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    tags: ['nice', 'developer'],
-  },
-  {
-    key: '2',
-    firstName: 'Jim',
-    lastName: 'Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    tags: ['loser'],
-  },
-  {
-    key: '3',
-    firstName: 'Joe',
-    lastName: 'Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    tags: ['cool', 'teacher'],
-  },
-];
-
+function deleteFn(record, newsList, setNewsList) {
+  axios.post('http://118.89.221.170:9004/api/news/news/delete', {
+    id: record.filterId,
+    type: record.filterType
+  })
+    .then(function (res) {
+      const { data } = res
+      const { message } = data
+      if (message === 'success') {
+        notification.success({
+          message: '删除成功',
+          description:
+            ''
+        });
+        setNewsList([...newsList.slice(0, newsList.indexOf(record)), ...newsList.slice(newsList.indexOf(record) + 1)])
+      }
+    })
+    .catch(function (e) {
+    });
+}
 
 function Delete() {
   const [newsList, setNewsList] = useState([])
-  console.log(newsList)
   return (
     <div className="editor-wrapper">
       <Search search={(res) => setNewsList(res)} />
       <div className="bottom-table">
-        <Table dataSource={data}>
-          <Column title="First Name" dataIndex="firstName" key="firstName" />
-          <Column title="Last Name" dataIndex="lastName" key="lastName" />
-          <Column title="Age" dataIndex="age" key="age" />
-          <Column title="Address" dataIndex="address" key="address" />
-          <Column
-            title="Tags"
-            dataIndex="tags"
-            key="tags"
-            render={tags => (
-              <span>
-                {tags.map(tag => (
-                  <Tag color="blue" key={tag}>
-                    {tag}
-                  </Tag>
-                ))}
-              </span>
-            )}
-          />
+        <Table dataSource={newsList}>
+          <Column title="filterName" dataIndex="filterName" key="filterName" />
+          <Column title="filterType" dataIndex="filterType" key="filterType" />
+          <Column title="filterId" dataIndex="filterId" key="filterId" />
           <Column
             title="Action"
             key="action"
@@ -68,8 +47,8 @@ function Delete() {
               <span>
                 Invite
               <Divider type="vertical" />
-                Delete
-            </span>
+                <span onClick={() => deleteFn(text, newsList, setNewsList)}>Delete</span>
+              </span>
             )}
           />
         </Table>
